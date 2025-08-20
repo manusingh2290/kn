@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kumple Blog</title>
   <link rel="icon" href="Kumple News.png" type="image/x-icon" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,6 +13,7 @@
       font-family: 'Inter', sans-serif;
       background-color: #f8f9fa;
     }
+
     .category-badge {
       display: inline-block;
       background-color: #e0f2fe;
@@ -22,12 +24,14 @@
       font-size: 0.875rem;
       cursor: pointer;
     }
+
     .category-badge.selected {
       background-color: #bfdbfe;
       color: #1e3a8a;
     }
   </style>
 </head>
+
 <body>
   <!-- Header -->
   <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
@@ -53,7 +57,8 @@
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 class="text-2xl font-bold mb-4">Login or Sign Up</h2>
           <input type="email" id="auth-email" placeholder="Email" class="w-full mb-3 px-4 py-2 border rounded-lg">
-          <input type="password" id="auth-password" placeholder="Password" class="w-full mb-3 px-4 py-2 border rounded-lg">
+          <input type="password" id="auth-password" placeholder="Password"
+            class="w-full mb-3 px-4 py-2 border rounded-lg">
           <div class="flex gap-4">
             <button id="login-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Login</button>
             <button id="signup-btn" class="bg-green-500 text-white px-4 py-2 rounded">Sign Up</button>
@@ -67,11 +72,15 @@
           <h2 class="text-2xl font-bold mb-4">Create New Post</h2>
           <form id="blog-form">
             <input type="text" id="title" placeholder="Post Title" class="w-full mb-4 px-4 py-2 border rounded-lg" />
-            <textarea id="content" rows="6" placeholder="Write your blog..." class="w-full mb-4 px-4 py-2 border rounded-lg"></textarea>
-            <input type="text" id="image" placeholder="Image URL (optional)" class="w-full mb-4 px-4 py-2 border rounded-lg">
+            <textarea id="content" rows="6" placeholder="Write your blog..."
+              class="w-full mb-4 px-4 py-2 border rounded-lg"></textarea>
+            <input type="text" id="image" placeholder="Image URL (optional)"
+              class="w-full mb-4 px-4 py-2 border rounded-lg">
             <input type="file" id="image-file" accept="image/*" class="w-full mb-4" />
-            <input type="text" id="youtube" placeholder="YouTube Video Link (optional)" class="w-full mb-4 px-4 py-2 border rounded-lg">
-            <input type="text" id="tags" placeholder="Tags (comma separated)" class="w-full mb-4 px-4 py-2 border rounded-lg">
+            <input type="text" id="youtube" placeholder="YouTube Video Link (optional)"
+              class="w-full mb-4 px-4 py-2 border rounded-lg">
+            <input type="text" id="tags" placeholder="Tags (comma separated)"
+              class="w-full mb-4 px-4 py-2 border rounded-lg">
             <input type="text" id="author" placeholder="Author Name" class="w-full mb-4 px-4 py-2 border rounded-lg">
             <div class="mb-4">
               <label class="block text-gray-700 font-medium mb-2">Selected Categories</label>
@@ -116,8 +125,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-  <script type="module" src="firebase.js"></script>
-
+  <script src="gitignore.js"></script>
 
   <script>
     firebase.initializeApp(firebaseConfig);
@@ -230,12 +238,13 @@
       }
 
       let finalImageUrl = imageUrl;
-      if (!imageUrl && fileInput.files.length > 0) {
+      if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const imageRef = firebase.storage().ref().child(`blog-images/${Date.now()}_${file.name}`);
         await imageRef.put(file);
-        finalImageUrl = await imageRef.getDownloadURL();
+        finalImageUrl = await imageRef.getDownloadURL(); // ✅ always gets URL
       }
+
 
       await db.collection("blogs").add({
         title, content, imageUrl: finalImageUrl, youtube, tags, categories,
@@ -251,14 +260,15 @@
     });
   </script>
   <script>
-  function getYouTubeThumbnail(url) {
-    try {
-      const videoId = new URL(url).searchParams.get("v");
-      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    } catch {
-      return null;
+    function getYouTubeThumbnail(url) {
+      try {
+        const videoId = new URL(url).searchParams.get("v");
+        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      } catch {
+        return null;
+      }
     }
-  }
-</script>
+  </script>
 </body>
+
 </html>
