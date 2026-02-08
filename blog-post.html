@@ -218,45 +218,81 @@
       }
     }
 
-    document.getElementById("blog-form").addEventListener("submit", async e => {
+    document.getElementById("blog-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const user = firebase.auth().currentUser;
-      if (!user) return alert("Please log in");
 
-      const title = document.getElementById("title").value.trim();
-      const content = document.getElementById("content").value.trim();
-      const imageUrl = document.getElementById("image").value.trim();
-      const youtube = document.getElementById("youtube").value.trim();
-      const tags = document.getElementById("tags").value.split(',').map(t => t.trim());
-      const categories = document.getElementById("categories").value.split(',').map(c => c.trim());
-      const author = document.getElementById("author").value.trim();
-      const fileInput = document.getElementById("image-file");
+      try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+          alert("Please log in");
+          return;
+        }
 
-      if (!title || !content || !author) {
-        alert("Title, Content, and Author are required.");
-        return;
+        const title = document.getElementById("title").value.trim();
+        const content = document.getElementById("content").value.trim();
+        const imageUrl = document.getElementById("image").value.trim();
+        const youtube = document.getElementById("youtube").value.trim();
+        const tags = document.getElementById("tags").value
+          .split(',')
+          .map(t => t.trim())
+          .filter(Boolean);
+
+        const categories = document.getElementById("categories").value
+          .split(',')
+          .map(c => c.trim().normalize("NFC"))
+          .filter(Boolean);
+
+        const author = document.getElementById("author").value.trim();
+        const fileInput = document.getElementById("image-file");
+
+        if (!title || !content || !author) {
+          alert("Title, Content, and Author are required.");
+          return;
+        }
+
+        if (categories.length === 0) {
+          alert("Please select at least one category.");
+          return;
+        }
+
+        let finalImageUrl = imageUrl;
+
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          const imageRef = firebase
+            .storage()
+            .ref()
+            .child(`blog-images/${Date.now()}_${file.name}`);
+
+          await imageRef.put(file);
+          finalImageUrl = await imageRef.getDownloadURL();
+        }
+
+        await db.collection("blogs").add({
+          title,
+          content,
+          imageUrl: finalImageUrl,
+          youtube,
+          tags,
+          categories,
+          author,
+          userId: user.uid,
+          userEmail: user.email,
+          date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("✅ Post published!");
+        document.getElementById("blog-form").reset();
+        selectedCategories.clear();
+        updateSelectedCategories();
+        document
+          .querySelectorAll(".category-badge.selected")
+          .forEach(el => el.classList.remove("selected"));
+
+      } catch (error) {
+        console.error("❌ Publish failed:", error);
+        alert("Failed to publish post. Check console.");
       }
-
-      let finalImageUrl = imageUrl;
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const imageRef = firebase.storage().ref().child(`blog-images/${Date.now()}_${file.name}`);
-        await imageRef.put(file);
-        finalImageUrl = await imageRef.getDownloadURL(); // ✅ always gets URL
-      }
-
-
-      await db.collection("blogs").add({
-        title, content, imageUrl: finalImageUrl, youtube, tags, categories,
-        author, userId: user.uid, userEmail: user.email,
-        date: new Date().toISOString()
-      });
-
-      alert("✅ Post published!");
-      document.getElementById("blog-form").reset();
-      selectedCategories.clear();
-      updateSelectedCategories();
-      document.querySelectorAll(".category-badge.selected").forEach(el => el.classList.remove("selected"));
     });
   </script>
   <script>
